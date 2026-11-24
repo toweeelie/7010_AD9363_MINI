@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2018-2023, 2025 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -8,7 +8,7 @@
 // terms.
 //
 // The user should read each of these license terms, and understand the
-// freedoms and responsabilities that he or she has by using this source/core.
+// freedoms and responsibilities that he or she has by using this source/core.
 //
 // This core is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -38,7 +38,8 @@
 module util_upack2_impl #(
   parameter NUM_OF_CHANNELS = 4,
   parameter SAMPLES_PER_CHANNEL = 1,
-  parameter SAMPLE_DATA_WIDTH = 16
+  parameter SAMPLE_DATA_WIDTH = 16,
+  parameter PARALLEL_OR_SERIAL_N = 0
 ) (
   input clk,
   input reset,
@@ -92,7 +93,8 @@ module util_upack2_impl #(
     .NUM_OF_CHANNELS (NUM_OF_CHANNELS),
     .SAMPLES_PER_CHANNEL (SAMPLES_PER_CHANNEL),
     .SAMPLE_DATA_WIDTH (SAMPLE_DATA_WIDTH),
-    .PACK (0)
+    .PACK (0),
+    .PARALLEL_OR_SERIAL_N (PARALLEL_OR_SERIAL_N)
   ) i_pack_shell (
     .clk (clk),
     .reset (reset),
@@ -106,8 +108,7 @@ module util_upack2_impl #(
     .out_data (out_data),
 
     .out_valid (),
-    .out_sync ()
-  );
+    .out_sync ());
 
   /*
    * Data at the output of the routing network is interleaved. The upack
@@ -120,8 +121,7 @@ module util_upack2_impl #(
     .WORD_WIDTH (SAMPLE_DATA_WIDTH)
   ) i_deinterleave (
     .data_in (out_data),
-    .data_out (deinterleaved_data)
-  );
+    .data_out (deinterleaved_data));
 
   always @(posedge clk) begin
     /* In case of an underflow the output vector should be zeroed */

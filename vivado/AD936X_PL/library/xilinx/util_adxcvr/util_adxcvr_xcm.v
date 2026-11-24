@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -57,7 +57,6 @@ module util_adxcvr_xcm #(
   parameter   [15:0]  QPLL_CP_G3 = 10'b0000011111,
   parameter   [15:0]  QPLL_LPF = 10'b0100110111,
   parameter   [15:0]  QPLL_CP = 10'b0001111111
-
 ) (
 
   // reset and clocks
@@ -82,7 +81,8 @@ module util_adxcvr_xcm #(
   input           up_cm_wr,
   input   [15:0]  up_cm_wdata,
   output  [15:0]  up_cm_rdata,
-  output          up_cm_ready);
+  output          up_cm_ready
+);
 
   localparam GTXE2_TRANSCEIVERS = 2;
   localparam GTHE3_TRANSCEIVERS = 5;
@@ -738,7 +738,3 @@ module util_adxcvr_xcm #(
   endgenerate
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************
-

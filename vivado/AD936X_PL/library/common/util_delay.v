@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2017-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -39,12 +39,13 @@ module util_delay #(
 
   parameter DATA_WIDTH = 1,
   // the minimum valid value for DELAY_CYCLES is 1
-  parameter DELAY_CYCLES = 1) (
-
+  parameter DELAY_CYCLES = 1
+) (
   input                             clk,
   input                             reset,
   input                             din,
-  output  [DATA_WIDTH-1:0]          dout);
+  output  [DATA_WIDTH-1:0]          dout
+);
 
   reg     [DATA_WIDTH-1:0]          dbuf[0:(DELAY_CYCLES-1)];
 

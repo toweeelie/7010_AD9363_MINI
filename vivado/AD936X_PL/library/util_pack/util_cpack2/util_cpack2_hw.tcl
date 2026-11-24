@@ -1,28 +1,10 @@
-# ***************************************************************************
-# ***************************************************************************
-# Copyright 2018 (c) Analog Devices, Inc. All rights reserved.
-#
-# Each core or library found in this collection may have its own licensing terms.
-# The user should keep this in in mind while exploring these cores.
-#
-# Redistribution and use in source and binary forms,
-# with or without modification of this file, are permitted under the terms of either
-#  (at the option of the user):
-#
-#   1. The GNU General Public License version 2 as published by the
-#      Free Software Foundation, which can be found in the top level directory, or at:
-# https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
-#
-# OR
-#
-#   2.  An ADI specific BSD license as noted in the top level directory, or on-line at:
-# https://github.com/analogdevicesinc/hdl/blob/dev/LICENSE
-#
-# ***************************************************************************
-# ***************************************************************************
+###############################################################################
+## Copyright (C) 2018-2025 Analog Devices, Inc. All rights reserved.
+### SPDX short identifier: ADIBSD
+###############################################################################
 
 package require qsys 14.0
-source ../../scripts/adi_env.tcl
+source ../../../scripts/adi_env.tcl
 source ../../scripts/adi_ip_intel.tcl
 
 ad_ip_create util_cpack2 {Channel Pack Utility v2} util_cpack_elab
@@ -49,6 +31,11 @@ ad_ip_parameter SAMPLE_DATA_WIDTH INTEGER 16 true [list \
   DISPLAY_NAME "Sample Data Width"
 ]
 
+ad_ip_parameter PARALLEL_OR_SERIAL_N INTEGER 0 true [list \
+  DISPLAY_NAME "Parallel prefix sum calculation" \
+  ALLOWED_RANGES {"0:Serial" "1:Parallel"} \
+]
+
 # defaults
 
 proc util_cpack_elab {} {
@@ -66,9 +53,9 @@ proc util_cpack_elab {} {
   set_interface_property reset associatedClock clk
 
   ad_interface signal packed_fifo_wr_en output 1 valid
-  ad_interface signal packed_fifo_wr_sync output 1 sync
   ad_interface signal packed_fifo_wr_data output $total_data_width data
   ad_interface signal packed_fifo_wr_overflow input 1 ovf
+  ad_interface signal packed_sync output 1 sync
 
   ad_interface signal fifo_wr_overflow output 1 ovf
 
@@ -86,4 +73,3 @@ proc util_cpack_elab {} {
     set_interface_property adc_ch_$n associatedReset ""
   }
 }
-

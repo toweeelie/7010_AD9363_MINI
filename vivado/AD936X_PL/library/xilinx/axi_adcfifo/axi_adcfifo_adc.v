@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -38,7 +38,8 @@
 module axi_adcfifo_adc #(
 
   parameter   ADC_DATA_WIDTH = 128,
-  parameter   AXI_DATA_WIDTH = 512) (
+  parameter   AXI_DATA_WIDTH = 512
+) (
 
   // fifo interface
 
@@ -54,7 +55,8 @@ module axi_adcfifo_adc #(
 
   input                   axi_drst,
   input                   axi_clk,
-  input       [ 3:0]      axi_xfer_status);
+  input       [ 3:0]      axi_xfer_status
+);
 
   localparam  ADC_MEM_RATIO = AXI_DATA_WIDTH/ADC_DATA_WIDTH;
 
@@ -111,7 +113,9 @@ module axi_adcfifo_adc #(
 
   // instantiations
 
-  up_xfer_status #(.DATA_WIDTH(4)) i_xfer_status (
+  up_xfer_status #(
+    .DATA_WIDTH(4)
+  ) i_xfer_status (
     .up_rstn (~adc_rst),
     .up_clk (adc_clk),
     .up_data_status (adc_xfer_status_s),
@@ -120,6 +124,3 @@ module axi_adcfifo_adc #(
     .d_data_status (axi_xfer_status));
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************

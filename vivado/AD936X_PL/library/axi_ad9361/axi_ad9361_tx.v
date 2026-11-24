@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -51,11 +51,13 @@ module axi_ad9361_tx #(
   parameter   INIT_DELAY = 0,
   parameter   DAC_DDS_DISABLE = 0,
   parameter   DAC_DDS_TYPE = 1,
+  parameter   DAC_DDS_PHASE_DW = 16,
   parameter   DAC_DDS_CORDIC_DW = 14,
   parameter   DAC_DDS_CORDIC_PHASE_DW = 13,
   parameter   USERPORTS_DISABLE = 0,
   parameter   DELAYCNTRL_DISABLE = 0,
-  parameter   IQCORRECTION_DISABLE = 0) (
+  parameter   IQCORRECTION_DISABLE = 0
+) (
 
   // dac interface
 
@@ -119,7 +121,8 @@ module axi_ad9361_tx #(
   input           up_rreq,
   input   [13:0]  up_raddr,
   output  [31:0]  up_rdata,
-  output          up_rack);
+  output          up_rack
+);
 
   // configuration settings
 
@@ -224,11 +227,12 @@ module axi_ad9361_tx #(
     .DISABLE (0),
     .DAC_DDS_DISABLE (DAC_DDS_DISABLE),
     .DAC_DDS_TYPE (DAC_DDS_TYPE),
+    .DAC_DDS_PHASE_DW (DAC_DDS_PHASE_DW),
     .DAC_DDS_CORDIC_DW (DAC_DDS_CORDIC_DW),
     .DAC_DDS_CORDIC_PHASE_DW (DAC_DDS_CORDIC_PHASE_DW),
     .USERPORTS_DISABLE (USERPORTS_DISABLE),
-    .IQCORRECTION_DISABLE (IQCORRECTION_DISABLE))
-  i_tx_channel_0 (
+    .IQCORRECTION_DISABLE (IQCORRECTION_DISABLE)
+  ) i_tx_channel_0 (
     .dac_clk (dac_clk),
     .dac_rst (dac_rst),
     .dac_valid (dac_valid_int),
@@ -259,11 +263,12 @@ module axi_ad9361_tx #(
     .DISABLE (0),
     .DAC_DDS_DISABLE (DAC_DDS_DISABLE),
     .DAC_DDS_TYPE (DAC_DDS_TYPE),
+    .DAC_DDS_PHASE_DW (DAC_DDS_PHASE_DW),
     .DAC_DDS_CORDIC_DW (DAC_DDS_CORDIC_DW),
     .DAC_DDS_CORDIC_PHASE_DW (DAC_DDS_CORDIC_PHASE_DW),
     .USERPORTS_DISABLE (USERPORTS_DISABLE),
-    .IQCORRECTION_DISABLE (IQCORRECTION_DISABLE))
-  i_tx_channel_1 (
+    .IQCORRECTION_DISABLE (IQCORRECTION_DISABLE)
+  ) i_tx_channel_1 (
     .dac_clk (dac_clk),
     .dac_rst (dac_rst),
     .dac_valid (dac_valid_int),
@@ -294,11 +299,12 @@ module axi_ad9361_tx #(
     .DISABLE (MODE_1R1T),
     .DAC_DDS_DISABLE (DAC_DDS_DISABLE),
     .DAC_DDS_TYPE (DAC_DDS_TYPE),
+    .DAC_DDS_PHASE_DW (DAC_DDS_PHASE_DW),
     .DAC_DDS_CORDIC_DW (DAC_DDS_CORDIC_DW),
     .DAC_DDS_CORDIC_PHASE_DW (DAC_DDS_CORDIC_PHASE_DW),
     .USERPORTS_DISABLE (USERPORTS_DISABLE),
-    .IQCORRECTION_DISABLE (IQCORRECTION_DISABLE))
-  i_tx_channel_2 (
+    .IQCORRECTION_DISABLE (IQCORRECTION_DISABLE)
+  ) i_tx_channel_2 (
     .dac_clk (dac_clk),
     .dac_rst (dac_rst),
     .dac_valid (dac_valid_int),
@@ -329,11 +335,12 @@ module axi_ad9361_tx #(
     .DISABLE (MODE_1R1T),
     .DAC_DDS_DISABLE (DAC_DDS_DISABLE),
     .DAC_DDS_TYPE (DAC_DDS_TYPE),
+    .DAC_DDS_PHASE_DW (DAC_DDS_PHASE_DW),
     .DAC_DDS_CORDIC_DW (DAC_DDS_CORDIC_DW),
     .DAC_DDS_CORDIC_PHASE_DW (DAC_DDS_CORDIC_PHASE_DW),
     .USERPORTS_DISABLE (USERPORTS_DISABLE),
-    .IQCORRECTION_DISABLE (IQCORRECTION_DISABLE))
-  i_tx_channel_3 (
+    .IQCORRECTION_DISABLE (IQCORRECTION_DISABLE)
+  ) i_tx_channel_3 (
     .dac_clk (dac_clk),
     .dac_rst (dac_rst),
     .dac_valid (dac_valid_int),
@@ -368,8 +375,8 @@ module axi_ad9361_tx #(
     .CLK_EDGE_SEL (CLK_EDGE_SEL),
     .DRP_DISABLE (1),
     .USERPORTS_DISABLE (USERPORTS_DISABLE),
-    .GPIO_DISABLE (0))
-  i_up_dac_common (
+    .GPIO_DISABLE (0)
+  ) i_up_dac_common (
     .mmcm_rst (),
     .dac_clk (dac_clk),
     .dac_rst (dac_rst),
@@ -378,6 +385,10 @@ module axi_ad9361_tx #(
     .dac_sync (dac_sync),
     .dac_frame (),
     .dac_clksel (dac_clksel),
+    .dac_custom_wr(),
+    .dac_custom_rd(32'b0),
+    .dac_custom_control(),
+    .dac_status_if_busy(1'b0),
     .dac_par_type (),
     .dac_par_enb (),
     .dac_r1_mode (dac_r1_mode),
@@ -419,8 +430,9 @@ module axi_ad9361_tx #(
     .DISABLE (DELAYCNTRL_DISABLE),
     .INIT_DELAY (INIT_DELAY),
     .DATA_WIDTH(16),
-    .BASE_ADDRESS(6'h12))
-  i_delay_cntrl (
+    .BASE_ADDRESS(6'h12)
+  ) i_delay_cntrl (
+    .core_rst (1'b0),
     .delay_clk (delay_clk),
     .delay_rst (delay_rst),
     .delay_locked (delay_locked),
@@ -439,6 +451,3 @@ module axi_ad9361_tx #(
     .up_rack (up_rack_s[5]));
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************

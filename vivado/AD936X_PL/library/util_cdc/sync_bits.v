@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -49,31 +49,32 @@ module sync_bits #(
   parameter NUM_OF_BITS = 1,
   // Whether input and output clocks are asynchronous, if 0 the synchronizer will
   // be bypassed and the output signal equals the input signal.
-  parameter ASYNC_CLK = 1)(
-
+  parameter ASYNC_CLK = 1
+) (
   input [NUM_OF_BITS-1:0] in_bits,
   input out_resetn,
   input out_clk,
-  output [NUM_OF_BITS-1:0] out_bits);
+  output [NUM_OF_BITS-1:0] out_bits
+);
 
-generate if (ASYNC_CLK == 1) begin
-  reg [NUM_OF_BITS-1:0] cdc_sync_stage1 = 'h0;
-  reg [NUM_OF_BITS-1:0] cdc_sync_stage2 = 'h0;
+  generate if (ASYNC_CLK == 1) begin
+    reg [NUM_OF_BITS-1:0] cdc_sync_stage1 = 'h0;
+    reg [NUM_OF_BITS-1:0] cdc_sync_stage2 = 'h0;
 
-  always @(posedge out_clk)
-  begin
-    if (out_resetn == 1'b0) begin
-      cdc_sync_stage1 <= 'b0;
-      cdc_sync_stage2 <= 'b0;
-    end else begin
-      cdc_sync_stage1 <= in_bits;
-      cdc_sync_stage2 <= cdc_sync_stage1;
+    always @(posedge out_clk)
+    begin
+      if (out_resetn == 1'b0) begin
+        cdc_sync_stage1 <= 'b0;
+        cdc_sync_stage2 <= 'b0;
+      end else begin
+        cdc_sync_stage1 <= in_bits;
+        cdc_sync_stage2 <= cdc_sync_stage1;
+      end
     end
-  end
 
-  assign out_bits = cdc_sync_stage2;
-end else begin
-  assign out_bits = in_bits;
-end endgenerate
+    assign out_bits = cdc_sync_stage2;
+  end else begin
+    assign out_bits = in_bits;
+  end endgenerate
 
 endmodule

@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2018 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2018-2025 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -8,7 +8,7 @@
 // terms.
 //
 // The user should read each of these license terms, and understand the
-// freedoms and responsabilities that he or she has by using this source/core.
+// freedoms and responsibilities that he or she has by using this source/core.
 //
 // This core is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -38,7 +38,8 @@
 module util_cpack2_impl #(
   parameter NUM_OF_CHANNELS = 4,
   parameter SAMPLES_PER_CHANNEL = 1,
-  parameter SAMPLE_DATA_WIDTH = 16
+  parameter SAMPLE_DATA_WIDTH = 16,
+  parameter PARALLEL_OR_SERIAL_N = 0
 ) (
   input clk,
   input reset,
@@ -51,25 +52,20 @@ module util_cpack2_impl #(
 
   output reg packed_fifo_wr_en = 1'b0,
   input packed_fifo_wr_overflow,
-  output reg packed_fifo_wr_sync = 1'b1,
-  output reg [NUM_OF_CHANNELS*SAMPLE_DATA_WIDTH*SAMPLES_PER_CHANNEL-1:0] packed_fifo_wr_data = 'h00
+  output reg [NUM_OF_CHANNELS*SAMPLE_DATA_WIDTH*SAMPLES_PER_CHANNEL-1:0] packed_fifo_wr_data = 'h00,
+  output reg packed_sync = 1'b1
 );
+
   localparam TOTAL_DATA_WIDTH = SAMPLE_DATA_WIDTH * SAMPLES_PER_CHANNEL * NUM_OF_CHANNELS;
 
-  /*
-   * Control signals from the pack shell.
-   */
+  // Control signals from the pack shell.
   wire reset_data;
   wire ready;
 
-  /*
-   * Interleaved version of `fifo_wr_data`.
-   */
+  // Interleaved version of `fifo_wr_data`.
   wire [TOTAL_DATA_WIDTH-1:0] interleaved_data;
 
-  /*
-   * Output data and corresponding control signal from the routing network.
-   */
+  // Output data and corresponding control signal from the routing network.
   wire [TOTAL_DATA_WIDTH-1:0] out_data;
   wire out_sync;
   wire [NUM_OF_CHANNELS*SAMPLES_PER_CHANNEL-1:0] out_valid;
@@ -99,14 +95,14 @@ module util_cpack2_impl #(
     .WORD_WIDTH (SAMPLE_DATA_WIDTH)
   ) i_interleave (
     .data_in (fifo_wr_data),
-    .data_out (interleaved_data)
-  );
+    .data_out (interleaved_data));
 
   pack_shell #(
     .NUM_OF_CHANNELS (NUM_OF_CHANNELS),
     .SAMPLES_PER_CHANNEL (SAMPLES_PER_CHANNEL),
     .SAMPLE_DATA_WIDTH (SAMPLE_DATA_WIDTH),
-    .PACK (1)
+    .PACK (1),
+    .PARALLEL_OR_SERIAL_N (PARALLEL_OR_SERIAL_N)
   ) i_pack_shell (
     .clk (clk),
     .reset (reset),
@@ -119,22 +115,20 @@ module util_cpack2_impl #(
     .in_data (interleaved_data),
     .out_data (out_data),
     .out_sync (out_sync),
-    .out_valid (out_valid)
-  );
+    .out_valid (out_valid));
 
   always @(posedge clk) begin
     if (reset_data == 1'b1) begin
       packed_fifo_wr_en <= 1'b0;
-      packed_fifo_wr_sync <= 1'b0;
+      packed_sync <= 1'b0;
     end else if (ready == 1'b1 && data_wr_en == 1'b1) begin
       packed_fifo_wr_en <= 1'b1;
-      packed_fifo_wr_sync <= out_sync;
+      packed_sync <= out_sync;
     end else begin
       packed_fifo_wr_en <= 1'b0;
-      packed_fifo_wr_sync <= 1'b0;
+      packed_sync <= 1'b0;
     end
   end
-
 
   always @(posedge clk) begin: gen_packed_fifo_wr_data
     integer i;

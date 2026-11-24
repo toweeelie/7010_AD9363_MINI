@@ -9,13 +9,14 @@
 include ../../quiet.mk
 
 M_DEPS := interfaces_ip.tcl
-M_DEPS += ../scripts/adi_env.tcl
+M_DEPS += ../../scripts/adi_env.tcl
 M_DEPS += ../scripts/adi_ip_xilinx.tcl
 
 M_VIVADO := vivado -mode batch -source
 
 M_FLIST := *.log
 M_FLIST += *.jou
+M_FLIST += *.sv
 M_FLIST += if_xcvr_cm.xml
 M_FLIST += if_xcvr_cm_rtl.xml
 M_FLIST += if_xcvr_ch.xml

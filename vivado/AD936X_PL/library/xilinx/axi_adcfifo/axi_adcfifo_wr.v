@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -41,7 +41,8 @@ module axi_adcfifo_wr #(
   parameter   AXI_SIZE = 2,
   parameter   AXI_LENGTH = 16,
   parameter   AXI_ADDRESS = 32'h00000000,
-  parameter   AXI_ADDRESS_LIMIT = 32'h00000000) (
+  parameter   AXI_ADDRESS_LIMIT = 32'h00000000
+) (
 
   // request and synchronization
 
@@ -91,7 +92,8 @@ module axi_adcfifo_wr #(
 
   output  reg             axi_dwovf,
   output  reg             axi_dwunf,
-  output  reg             axi_werror);
+  output  reg             axi_werror
+);
 
   localparam  AXI_BYTE_WIDTH = AXI_DATA_WIDTH/8;
   localparam  AXI_AWINCR = AXI_LENGTH * AXI_BYTE_WIDTH;
@@ -389,7 +391,9 @@ module axi_adcfifo_wr #(
 
   // interface handler
 
-  ad_axis_inf_rx #(.DATA_WIDTH(AXI_DATA_WIDTH)) i_axis_inf (
+  ad_axis_inf_rx #(
+    .DATA_WIDTH(AXI_DATA_WIDTH)
+  ) i_axis_inf (
     .clk (axi_clk),
     .rst (axi_reset),
     .valid (axi_rd_d),
@@ -402,7 +406,10 @@ module axi_adcfifo_wr #(
 
   // buffer
 
-  ad_mem #(.DATA_WIDTH(AXI_DATA_WIDTH), .ADDRESS_WIDTH(8)) i_mem (
+  ad_mem #(
+    .DATA_WIDTH(AXI_DATA_WIDTH),
+    .ADDRESS_WIDTH(8)
+  ) i_mem (
     .clka (adc_clk),
     .wea (adc_wr),
     .addra (adc_waddr),
@@ -413,6 +420,3 @@ module axi_adcfifo_wr #(
     .doutb (axi_rdata_s));
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************

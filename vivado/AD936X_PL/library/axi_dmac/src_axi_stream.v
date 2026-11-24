@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2024 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -39,9 +39,9 @@ module src_axi_stream #(
 
   parameter ID_WIDTH = 3,
   parameter S_AXIS_DATA_WIDTH = 64,
-  parameter LENGTH_WIDTH = 24,
-  parameter BEATS_PER_BURST_WIDTH = 4)(
-
+  parameter S_AXIS_USER_SYNC = 1,
+  parameter BEATS_PER_BURST_WIDTH = 4
+) (
   input s_axis_aclk,
   input s_axis_aresetn,
 
@@ -81,55 +81,58 @@ module src_axi_stream #(
   output req_ready,
   input [BEATS_PER_BURST_WIDTH-1:0] req_last_burst_length,
   input req_sync_transfer_start,
+  input req_sync,
   input req_xlast
 );
 
-assign enabled = enable;
+  wire sync;
 
-data_mover # (
-  .ID_WIDTH(ID_WIDTH),
-  .DATA_WIDTH(S_AXIS_DATA_WIDTH),
-  .BEATS_PER_BURST_WIDTH(BEATS_PER_BURST_WIDTH),
-  .ALLOW_ABORT(1)
-) i_data_mover (
-  .clk(s_axis_aclk),
-  .resetn(s_axis_aresetn),
+  assign enabled = enable;
+  assign sync = S_AXIS_USER_SYNC ? s_axis_user[0] : req_sync;
 
-  .xfer_req(s_axis_xfer_req),
+  data_mover #(
+    .ID_WIDTH(ID_WIDTH),
+    .DATA_WIDTH(S_AXIS_DATA_WIDTH),
+    .BEATS_PER_BURST_WIDTH(BEATS_PER_BURST_WIDTH),
+    .ALLOW_ABORT(1)
+  ) i_data_mover (
+    .clk(s_axis_aclk),
+    .resetn(s_axis_aresetn),
 
-  .request_id(request_id),
-  .response_id(response_id),
-  .eot(eot),
+    .xfer_req(s_axis_xfer_req),
 
-  .rewind_req_valid(rewind_req_valid),
-  .rewind_req_ready(rewind_req_ready),
-  .rewind_req_data(rewind_req_data),
+    .request_id(request_id),
+    .response_id(response_id),
+    .eot(eot),
 
-  .bl_valid(bl_valid),
-  .bl_ready(bl_ready),
-  .measured_last_burst_length(measured_last_burst_length),
+    .rewind_req_valid(rewind_req_valid),
+    .rewind_req_ready(rewind_req_ready),
+    .rewind_req_data(rewind_req_data),
 
-  .block_descr_to_dst(block_descr_to_dst),
+    .bl_valid(bl_valid),
+    .bl_ready(bl_ready),
+    .measured_last_burst_length(measured_last_burst_length),
 
-  .source_id(source_id),
-  .source_eot(source_eot),
+    .block_descr_to_dst(block_descr_to_dst),
 
-  .req_valid(req_valid),
-  .req_ready(req_ready),
-  .req_last_burst_length(req_last_burst_length),
-  .req_sync_transfer_start(req_sync_transfer_start),
-  .req_xlast(req_xlast),
+    .source_id(source_id),
+    .source_eot(source_eot),
 
-  .s_axi_valid(s_axis_valid),
-  .s_axi_ready(s_axis_ready),
-  .s_axi_data(s_axis_data),
-  .s_axi_last(s_axis_last),
-  .s_axi_sync(s_axis_user[0]),
+    .req_valid(req_valid),
+    .req_ready(req_ready),
+    .req_last_burst_length(req_last_burst_length),
+    .req_sync_transfer_start(req_sync_transfer_start),
+    .req_xlast(req_xlast),
 
-  .m_axi_valid(fifo_valid),
-  .m_axi_data(fifo_data),
-  .m_axi_last(fifo_last),
-  .m_axi_partial_burst(fifo_partial_burst)
-);
+    .s_axi_valid(s_axis_valid),
+    .s_axi_ready(s_axis_ready),
+    .s_axi_data(s_axis_data),
+    .s_axi_last(s_axis_last),
+    .s_axi_sync(sync),
+
+    .m_axi_valid(fifo_valid),
+    .m_axi_data(fifo_data),
+    .m_axi_last(fifo_last),
+    .m_axi_partial_burst(fifo_partial_burst));
 
 endmodule

@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2018-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -36,11 +36,10 @@
 `timescale 1ns/100ps
 
 module reset_manager_tb;
-  parameter VCD_FILE = {`__FILE__,"cd"};
+  parameter VCD_FILE = {"reset_manager_tb.vcd"};
 
   `define TIMEOUT 1000000
   `include "tb_base.v"
-
 
   reg clk_a = 1'b0;
   reg clk_b = 1'b0;
@@ -84,7 +83,6 @@ module reset_manager_tb;
   wire src_enable;
   wire src_enabled = src_enabled_shift[15];
 
-
   always @(posedge clk_a) begin
     req_enabled_shift <= {req_enabled_shift[14:0],req_enable};
   end
@@ -115,7 +113,6 @@ module reset_manager_tb;
     .src_clk(clk_c),
     .src_ext_resetn(1'b0),
     .src_enable(src_enable),
-    .src_enabled(src_enabled)
-  );
+    .src_enabled(src_enabled));
 
 endmodule

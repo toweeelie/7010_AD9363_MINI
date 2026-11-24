@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -40,12 +40,12 @@
 
 `timescale 1ns/100ps
 
-module util_axis_upscale # (
+module util_axis_upscale #(
 
   parameter NUM_OF_CHANNELS = 4,
   parameter DATA_WIDTH = 24,
-  parameter UDATA_WIDTH = 32)(
-
+  parameter UDATA_WIDTH = 32
+) (
   input                                           clk,
   input                                           resetn,
 
@@ -59,7 +59,8 @@ module util_axis_upscale # (
 
   input                                           dfmt_enable,
   input                                           dfmt_type,
-  input                                           dfmt_se);
+  input                                           dfmt_se
+);
 
   wire                                        type_s;
   wire                                        signext_s;
@@ -72,16 +73,14 @@ module util_axis_upscale # (
 
   genvar i;
   generate
-  for (i=1; i <= NUM_OF_CHANNELS; i=i+1) begin : signext_data
+    for (i=1; i <= NUM_OF_CHANNELS; i=i+1) begin : signext_data
+      wire sign_s;
 
-    wire sign_s;
-
-    assign sign_s = signext_s & (type_s ^ s_axis_data[(i*DATA_WIDTH-1)]);
-    assign data_out_s[(i*UDATA_WIDTH-1):(i*UDATA_WIDTH-MSB_WIDTH)] = {(MSB_WIDTH){sign_s}};
-    assign data_out_s[((i-1)*UDATA_WIDTH+DATA_WIDTH-1)] = type_s ^ s_axis_data[(i*DATA_WIDTH-1)];
-    assign data_out_s[((i-1)*UDATA_WIDTH+DATA_WIDTH-2):((i-1)*UDATA_WIDTH)] = s_axis_data[(i*DATA_WIDTH-2):((i-1)*DATA_WIDTH)];
-
-  end
+      assign sign_s = signext_s & (type_s ^ s_axis_data[(i*DATA_WIDTH-1)]);
+      assign data_out_s[(i*UDATA_WIDTH-1):(i*UDATA_WIDTH-MSB_WIDTH)] = {(MSB_WIDTH){sign_s}};
+      assign data_out_s[((i-1)*UDATA_WIDTH+DATA_WIDTH-1)] = type_s ^ s_axis_data[(i*DATA_WIDTH-1)];
+      assign data_out_s[((i-1)*UDATA_WIDTH+DATA_WIDTH-2):((i-1)*UDATA_WIDTH)] = s_axis_data[(i*DATA_WIDTH-2):((i-1)*DATA_WIDTH)];
+    end
   endgenerate
 
   always @(posedge clk) begin

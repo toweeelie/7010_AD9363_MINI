@@ -1,6 +1,10 @@
-# ip
+###############################################################################
+## Copyright (C) 2015-2023 Analog Devices, Inc. All rights reserved.
+### SPDX short identifier: ADIBSD
+###############################################################################
 
-source ../scripts/adi_env.tcl
+# ip
+source ../../scripts/adi_env.tcl
 source $ad_hdl_dir/library/scripts/adi_ip_xilinx.tcl
 
 adi_if_define if_xcvr_cm

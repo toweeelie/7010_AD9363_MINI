@@ -1,7 +1,10 @@
-
+###############################################################################
+## Copyright (C) 2016-2023 Analog Devices, Inc. All rights reserved.
+### SPDX short identifier: ADIBSD
+###############################################################################
 
 package require qsys 14.0
-source ../scripts/adi_env.tcl
+source ../../scripts/adi_env.tcl
 source ../scripts/adi_ip_intel.tcl
 
 set_module_property NAME util_wfifo

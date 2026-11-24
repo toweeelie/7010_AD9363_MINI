@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -35,12 +35,9 @@
 
 `timescale 1ns/1ps
 
-module axi_ad9361_tdd_if#(
-
-  parameter       LEVEL_OR_PULSE_N = 0) (
-
-  // clock
-
+module axi_ad9361_tdd_if #(
+  parameter       LEVEL_OR_PULSE_N = 0
+) (
   input                   clk,
   input                   rst,
 
@@ -58,14 +55,13 @@ module axi_ad9361_tdd_if#(
 
   // interface status
 
-  output      [ 7:0]      ad9361_tdd_status);
-
+  output      [ 7:0]      ad9361_tdd_status
+);
 
   localparam      PULSE_MODE = 0;
   localparam      LEVEL_MODE = 1;
 
   // internal registers
-
 
   reg             tdd_vco_overlap = 1'b0;
   reg             tdd_rf_overlap = 1'b0;
@@ -91,7 +87,7 @@ module axi_ad9361_tdd_if#(
   endgenerate
 
   always @(posedge clk) begin
-    if(rst == 1'b1) begin
+    if (rst == 1'b1) begin
       tdd_vco_overlap <= 1'b0;
       tdd_rf_overlap <= 1'b0;
     end else begin
@@ -106,4 +102,3 @@ module axi_ad9361_tdd_if#(
   assign ad9361_enable = ad9361_enable_s;
 
 endmodule
-

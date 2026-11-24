@@ -1,8 +1,12 @@
+###############################################################################
+## Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
+### SPDX short identifier: ADIBSD
+###############################################################################
 
 package require qsys 14.0
 package require quartus::device
 
-source ../scripts/adi_env.tcl
+source ../../scripts/adi_env.tcl
 source ../scripts/adi_ip_intel.tcl
 
 ad_ip_create axi_ad9361 {AXI AD9361 Interface} axi_ad9361_elab

@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -56,7 +56,8 @@ module axi_adxcvr_up #(
   parameter   [ 4:0]  TX_POSTCURSOR = 5'd0,
   parameter   [ 4:0]  TX_PRECURSOR = 5'd0,
   parameter   [ 1:0]  SYS_CLK_SEL = 2'd3,
-  parameter   [ 2:0]  OUT_CLK_SEL = 3'd4) (
+  parameter   [ 2:0]  OUT_CLK_SEL = 3'd4
+) (
 
   // common
 
@@ -129,7 +130,8 @@ module axi_adxcvr_up #(
   input               up_rreq,
   input      [ 9:0]   up_raddr,
   output     [31:0]   up_rdata,
-  output              up_rack);
+  output              up_rack
+);
 
   // parameters
 
@@ -572,6 +574,3 @@ module axi_adxcvr_up #(
   end
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************

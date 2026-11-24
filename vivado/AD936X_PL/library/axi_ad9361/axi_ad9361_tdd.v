@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2015-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -75,7 +75,8 @@ module axi_ad9361_tdd (
   input                   up_rreq,
   input       [13:0]      up_raddr,
   output      [31:0]      up_rdata,
-  output                  up_rack);
+  output                  up_rack
+);
 
   // internal signals
 
@@ -152,7 +153,7 @@ module axi_ad9361_tdd (
 
   // instantiations
 
-  up_tdd_cntrl i_up_tdd_cntrl(
+  up_tdd_cntrl i_up_tdd_cntrl (
     .clk(clk),
     .rst(rst),
     .tdd_enable(tdd_enable_s),
@@ -206,8 +207,8 @@ module axi_ad9361_tdd (
 
   ad_tdd_control #(
     .TX_DATA_PATH_DELAY(),
-    .CONTROL_PATH_DELAY())
-  i_tdd_control(
+    .CONTROL_PATH_DELAY()
+  ) i_tdd_control(
     .clk(clk),
     .rst(rst),
     .tdd_enable(tdd_enable_s),

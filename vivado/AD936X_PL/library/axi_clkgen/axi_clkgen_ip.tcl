@@ -1,6 +1,10 @@
-# ip
+###############################################################################
+## Copyright (C) 2014-2025 Analog Devices, Inc. All rights reserved.
+### SPDX short identifier: ADIBSD
+###############################################################################
 
-source ../scripts/adi_env.tcl
+# ip
+source ../../scripts/adi_env.tcl
 source $ad_hdl_dir/library/scripts/adi_ip_xilinx.tcl
 
 adi_ip_create axi_clkgen
@@ -12,6 +16,11 @@ adi_ip_files axi_clkgen [list \
   "$ad_hdl_dir/library/scripts/adi_xilinx_device_info_enc.tcl" \
   "bd/bd.tcl" \
   "axi_clkgen.v" ]
+
+set_property used_in_simulation false [get_files ./bd/bd.tcl]
+set_property used_in_simulation false [get_files $ad_hdl_dir/library/scripts/adi_xilinx_device_info_enc.tcl]
+set_property used_in_synthesis false [get_files ./bd/bd.tcl]
+set_property used_in_synthesis false [get_files $ad_hdl_dir/library/scripts/adi_xilinx_device_info_enc.tcl]
 
 adi_ip_properties axi_clkgen
 adi_ip_bd axi_clkgen "bd/bd.tcl"

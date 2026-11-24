@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2015-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -43,7 +43,8 @@
 
 module ad_csc_CrYCb2RGB #(
 
-  parameter   DELAY_DATA_WIDTH = 16) (
+  parameter   DELAY_DATA_WIDTH = 16
+) (
 
   // Cr-Y-Cb inputs
 
@@ -54,7 +55,8 @@ module ad_csc_CrYCb2RGB #(
   // R-G-B outputs
 
   output      [DELAY_DATA_WIDTH-1:0]  RGB_sync,
-  output      [23:0]                  RGB_data);
+  output      [23:0]                  RGB_data
+);
 
   localparam  DW = DELAY_DATA_WIDTH - 1;
 
@@ -64,8 +66,8 @@ module ad_csc_CrYCb2RGB #(
     .DELAY_DW (DELAY_DATA_WIDTH),
     .MUL_COEF_DW (18),
     .SUM_COEF_DW (28),
-    .YCbCr_2_RGB (1))
-  i_csc_R (
+    .YCbCr_2_RGB (1)
+  ) i_csc_R (
     .clk (clk),
     .sync (CrYCb_sync),
     .data (CrYCb_data),
@@ -81,8 +83,8 @@ module ad_csc_CrYCb2RGB #(
   ad_csc  #(
     .MUL_COEF_DW (18),
     .SUM_COEF_DW (28),
-    .YCbCr_2_RGB (1))
-  i_csc_G (
+    .YCbCr_2_RGB (1)
+  ) i_csc_G (
     .clk (clk),
     .sync (1'd0),
     .data (CrYCb_data),
@@ -98,8 +100,8 @@ module ad_csc_CrYCb2RGB #(
   ad_csc #(
     .MUL_COEF_DW (18),
     .SUM_COEF_DW (28),
-    .YCbCr_2_RGB (1))
-  i_csc_B (
+    .YCbCr_2_RGB (1)
+  ) i_csc_B (
     .clk (clk),
     .sync (1'd0),
     .data (CrYCb_data),
@@ -111,6 +113,3 @@ module ad_csc_CrYCb2RGB #(
     .csc_data (RGB_data[7:0]));
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************

@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -43,13 +43,16 @@ module up_delay_cntrl #(
   parameter   INIT_DELAY = 0,
   parameter   DATA_WIDTH = 8,
   parameter   DRP_WIDTH = 5,
-  parameter   BASE_ADDRESS = 6'h02) (
+  parameter   BASE_ADDRESS = 6'h02,
+  parameter   CUSTOM_RST = 0
+) (
 
   // delay interface
 
   input                           delay_clk,
   output                          delay_rst,
   input                           delay_locked,
+  input                           core_rst,
 
   // io interface
 
@@ -68,7 +71,8 @@ module up_delay_cntrl #(
   input                           up_rreq,
   input   [13:0]                  up_raddr,
   output  [31:0]                  up_rdata,
-  output                          up_rack);
+  output                          up_rack
+);
 
   generate
   if (DISABLE == 1) begin
@@ -194,15 +198,20 @@ module up_delay_cntrl #(
 
   assign delay_rst = delay_rst_s;
 
-  ad_rst i_delay_rst_reg (
-    .rst_async (up_preset),
-    .clk (delay_clk),
-    .rstn (),
-    .rst (delay_rst_s));
+  if (CUSTOM_RST == 1) begin
+    ad_rst i_delay_rst_reg (
+      .rst_async (core_rst),
+      .clk (delay_clk),
+      .rstn (),
+      .rst (delay_rst_s));
+  end else begin
+    ad_rst i_delay_rst_reg (
+      .rst_async (up_preset),
+      .clk (delay_clk),
+      .rstn (),
+      .rst (delay_rst_s));
+  end
+
   end
   endgenerate
-
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************

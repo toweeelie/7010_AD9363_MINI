@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2016-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -42,7 +42,8 @@ module axi_xcvrlb #(
   parameter   integer CPLL_FBDIV = 1,
   parameter   integer CPLL_FBDIV_4_5 = 5,
   parameter   NUM_OF_LANES = 1,
-  parameter   integer XCVR_TYPE = 2) (
+  parameter   integer XCVR_TYPE = 2
+) (
 
   // transceiver interface
 
@@ -74,7 +75,8 @@ module axi_xcvrlb #(
   output                        s_axi_rvalid,
   output  [ 1:0]                s_axi_rresp,
   output  [31:0]                s_axi_rdata,
-  input                         s_axi_rready);
+  input                         s_axi_rready
+);
 
   // internal registers
 
@@ -168,8 +170,8 @@ module axi_xcvrlb #(
   axi_xcvrlb_1 #(
     .XCVR_TYPE (XCVR_TYPE),
     .CPLL_FBDIV_4_5(CPLL_FBDIV_4_5),
-    .CPLL_FBDIV(CPLL_FBDIV))
-  i_xcvrlb_1 (
+    .CPLL_FBDIV(CPLL_FBDIV)
+  ) i_xcvrlb_1 (
     .ref_clk (ref_clk),
     .rx_p (rx_p[n]),
     .rx_n (rx_n[n]),
@@ -179,12 +181,13 @@ module axi_xcvrlb #(
     .up_clk (up_clk),
     .up_resetn (up_resetn),
     .up_status (up_status_s[n]),
-    .up_pll_locked (up_pll_locked_s[n])
-    );
+    .up_pll_locked (up_pll_locked_s[n]));
   end
   endgenerate
 
-  up_axi #(.AXI_ADDRESS_WIDTH (10)) i_axi (
+  up_axi #(
+    .AXI_ADDRESS_WIDTH (10)
+  ) i_axi (
     .up_rstn (up_rstn),
     .up_clk (up_clk),
     .up_axi_awvalid (s_axi_awvalid),
@@ -214,7 +217,3 @@ module axi_xcvrlb #(
     .up_rack (up_rack));
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************
-

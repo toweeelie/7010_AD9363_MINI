@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2024 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -44,7 +44,8 @@ module axi_ad9361_lvds_if #(
   parameter   CLK_DESKEW = 0,
   parameter   USE_SSI_CLK = 1,
   parameter   DELAY_REFCLK_FREQUENCY = 200,
-  parameter   RX_NODPA = 0) (
+  parameter   RX_NODPA = 0
+) (
 
   // physical interface (receive)
 
@@ -121,7 +122,8 @@ module axi_ad9361_lvds_if #(
   input   [31:0]      up_drp_wdata,
   output  [31:0]      up_drp_rdata,
   output              up_drp_ready,
-  output              up_drp_locked);
+  output              up_drp_locked
+);
 
   // internal registers
 
@@ -164,6 +166,7 @@ module axi_ad9361_lvds_if #(
   wire    [ 5:0]      rx_data_0_s;
   wire    [ 1:0]      rx_frame_s;
   wire                locked_s;
+  wire                rx_error;
 
   // drp interface signals
 
@@ -212,17 +215,9 @@ module axi_ad9361_lvds_if #(
   end
 
   // frame check
-
+  assign rx_error = ^rx_frame;
 
   // delineation
-  reg             rx_error_r1 = 'd0;
-  reg             rx_error_r2 = 'd0;
-
-  always @(posedge l_clk) begin
-    rx_error_r1 <= ~((rx_frame_s == 4'b1100) || (rx_frame_s == 4'b0011));
-    rx_error_r2 <= ~((rx_frame_s == 4'b1111) || (rx_frame_s == 4'b1100) ||
-                     (rx_frame_s == 4'b0000) || (rx_frame_s == 4'b0011));
-  end
 
   always @(posedge l_clk) begin
       case ({rx_r1_mode, rx_frame_s, rx_frame})
@@ -251,11 +246,7 @@ module axi_ad9361_lvds_if #(
   // adc-status
 
   always @(posedge l_clk) begin
-    if (adc_r1_mode == 1'b1) begin
-      adc_status_p <= ~rx_error_r1 & rx_locked;
-    end else begin
-      adc_status_p <= ~rx_error_r2 & rx_locked;
-    end
+    adc_status_p <= ~rx_error & rx_locked;
   end
 
   // transfer to common clock
@@ -454,8 +445,8 @@ module axi_ad9361_lvds_if #(
     .FPGA_TECHNOLOGY (FPGA_TECHNOLOGY),
     .IODELAY_CTRL (0),
     .IODELAY_GROUP (IO_DELAY_GROUP),
-    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
-  i_rx_data (
+    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY)
+  ) i_rx_data (
     .rx_clk (l_clk),
     .rx_data_in_p (rx_data_in_p[i]),
     .rx_data_in_n (rx_data_in_n[i]),
@@ -477,8 +468,8 @@ module axi_ad9361_lvds_if #(
     .FPGA_TECHNOLOGY (FPGA_TECHNOLOGY),
     .IODELAY_CTRL (IODELAY_CTRL),
     .IODELAY_GROUP (IO_DELAY_GROUP),
-    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
-  i_rx_frame (
+    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY)
+  ) i_rx_frame (
     .rx_clk (l_clk),
     .rx_data_in_p (rx_frame_in_p),
     .rx_data_in_n (rx_frame_in_n),
@@ -501,8 +492,8 @@ module axi_ad9361_lvds_if #(
     .IODELAY_ENABLE (DAC_IODELAY_ENABLE),
     .IODELAY_CTRL (0),
     .IODELAY_GROUP (IO_DELAY_GROUP),
-    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
-  i_tx_data (
+    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY)
+  ) i_tx_data (
     .tx_clk (l_clk),
     .tx_data_p (tx_data_1[i]),
     .tx_data_n (tx_data_0[i]),
@@ -525,8 +516,8 @@ module axi_ad9361_lvds_if #(
     .IODELAY_ENABLE (DAC_IODELAY_ENABLE),
     .IODELAY_CTRL (0),
     .IODELAY_GROUP (IO_DELAY_GROUP),
-    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
-  i_tx_frame (
+    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY)
+  ) i_tx_frame (
     .tx_clk (l_clk),
     .tx_data_p (tx_frame),
     .tx_data_n (tx_frame),
@@ -547,8 +538,8 @@ module axi_ad9361_lvds_if #(
     .IODELAY_ENABLE (DAC_IODELAY_ENABLE),
     .IODELAY_CTRL (0),
     .IODELAY_GROUP (IO_DELAY_GROUP),
-    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
-  i_tx_clk (
+    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY)
+  ) i_tx_clk (
     .tx_clk (l_clk),
     .tx_data_p (tx_clk[1]),
     .tx_data_n (tx_clk[0]),
@@ -570,8 +561,8 @@ module axi_ad9361_lvds_if #(
     .IODELAY_ENABLE (DAC_IODELAY_ENABLE),
     .IODELAY_CTRL (0),
     .IODELAY_GROUP (IO_DELAY_GROUP),
-    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
-  i_enable (
+    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY)
+  ) i_enable (
     .tx_clk (l_clk),
     .tx_data_p (enable_int_p),
     .tx_data_n (enable_int_p),
@@ -593,8 +584,8 @@ module axi_ad9361_lvds_if #(
     .IODELAY_ENABLE (DAC_IODELAY_ENABLE),
     .IODELAY_CTRL (0),
     .IODELAY_GROUP (IO_DELAY_GROUP),
-    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY))
-  i_txnrx (
+    .REFCLK_FREQUENCY (DELAY_REFCLK_FREQUENCY)
+  ) i_txnrx (
     .tx_clk (l_clk),
     .tx_data_p (txnrx_int_p),
     .tx_data_n (txnrx_int_p),
@@ -610,8 +601,7 @@ module axi_ad9361_lvds_if #(
 
   // device clock interface (receive clock)
   generate if (USE_SSI_CLK == 1) begin
-  ad_data_clk
-  i_clk (
+  ad_data_clk i_clk (
     .rst (1'd0),
     .locked (),
     .clk_in_p (rx_clk_in_p),
@@ -623,6 +613,3 @@ module axi_ad9361_lvds_if #(
   endgenerate
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************

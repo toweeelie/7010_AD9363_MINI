@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2015-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -37,8 +37,8 @@
 
 module up_pmod #(
 
-  parameter       ID = 0) (
-
+  parameter       ID = 0
+) (
   input                   pmod_clk,
   output                  pmod_rst,
   input       [31:0]      pmod_signal_freq,
@@ -54,7 +54,8 @@ module up_pmod #(
   input                   up_rreq,
   input       [13:0]      up_raddr,
   output  reg [31:0]      up_rdata,
-  output  reg             up_rack);
+  output  reg             up_rack
+);
 
   localparam      PCORE_VERSION = 32'h00010001;
 
@@ -118,11 +119,17 @@ module up_pmod #(
 
   // resets
 
-  ad_rst i_adc_rst_reg (.rst_async(up_preset_s), .clk(pmod_clk), .rstn(), .rst(pmod_rst));
+  ad_rst i_adc_rst_reg (
+    .rst_async(up_preset_s),
+    .clk(pmod_clk),
+    .rstn(),
+    .rst(pmod_rst));
 
   // adc control & status
 
-  up_xfer_status #(.DATA_WIDTH(32)) i_pmod_xfer_status (
+  up_xfer_status #(
+    .DATA_WIDTH(32)
+  ) i_pmod_xfer_status (
     .up_rstn (up_rstn),
     .up_clk (up_clk),
     .up_data_status (up_pmod_signal_freq_s),
@@ -131,6 +138,3 @@ module up_pmod #(
     .d_data_status (pmod_signal_freq));
 
 endmodule
-
-// ***************************************************************************
-// ***************************************************************************

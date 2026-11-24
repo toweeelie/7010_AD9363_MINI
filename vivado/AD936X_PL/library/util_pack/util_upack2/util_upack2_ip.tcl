@@ -1,27 +1,9 @@
-# ***************************************************************************
-# ***************************************************************************
-# Copyright 2018 (c) Analog Devices, Inc. All rights reserved.
-#
-# Each core or library found in this collection may have its own licensing terms.
-# The user should keep this in in mind while exploring these cores.
-#
-# Redistribution and use in source and binary forms,
-# with or without modification of this file, are permitted under the terms of either
-#  (at the option of the user):
-#
-#   1. The GNU General Public License version 2 as published by the
-#      Free Software Foundation, which can be found in the top level directory, or at:
-# https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
-#
-# OR
-#
-#   2.  An ADI specific BSD license as noted in the top level directory, or on-line at:
-# https://github.com/analogdevicesinc/hdl/blob/dev/LICENSE
-#
-# ***************************************************************************
-# ***************************************************************************
+###############################################################################
+## Copyright (C) 2018-2023, 2025 Analog Devices, Inc. All rights reserved.
+### SPDX short identifier: ADIBSD
+###############################################################################
 
-source ../../scripts/adi_env.tcl
+source ../../../scripts/adi_env.tcl
 source $ad_hdl_dir/library/scripts/adi_ip_xilinx.tcl
 
 adi_ip_create util_upack2
@@ -33,6 +15,8 @@ adi_ip_files util_upack2 [list \
   "../util_pack_common/pack_shell.v" \
   "util_upack2_impl.v" \
   "util_upack2.v" ]
+
+set_property source_mgmt_mode DisplayOnly [current_project]
 
 adi_ip_properties_lite util_upack2
 
@@ -56,6 +40,7 @@ foreach {k v} { \
   "NUM_OF_CHANNELS" "Number of Channels" \
   "SAMPLES_PER_CHANNEL" "Samples per Channel" \
   "SAMPLE_DATA_WIDTH" "Sample Width" \
+  "PARALLEL_OR_SERIAL_N" "Parallel prefix sum calculation" \
   } { \
   set p [ipgui::get_guiparamspec -name $k -component $cc]
 #  ipgui::move_param -component $cc -order $i $p -parent $

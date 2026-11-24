@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2017-2023, 2025 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -8,7 +8,7 @@
 // terms.
 //
 // The user should read each of these license terms, and understand the
-// freedoms and responsabilities that he or she has by using this source/core.
+// freedoms and responsibilities that he or she has by using this source/core.
 //
 // This core is distributed in the hope that it will be useful, but WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -39,7 +39,8 @@ module pack_shell #(
   parameter NUM_OF_CHANNELS = 4,
   parameter SAMPLES_PER_CHANNEL = 1,
   parameter SAMPLE_DATA_WIDTH = 16,
-  parameter PACK = 0
+  parameter PACK = 0,
+  parameter PARALLEL_OR_SERIAL_N = 0
 ) (
   input clk,
   input reset,
@@ -57,13 +58,15 @@ module pack_shell #(
   output out_sync,
   output [NUM_OF_CHANNELS*SAMPLES_PER_CHANNEL-1:0] out_valid
 );
-  /* If the number of active channels can be a non-power of two */
+
+  // If the number of active channels can be a non-power of two
   localparam NON_POWER_OF_TWO = NUM_OF_CHANNELS > 2;
 
   localparam CHANNEL_DATA_WIDTH = SAMPLES_PER_CHANNEL * SAMPLE_DATA_WIDTH;
 
   localparam TOTAL_DATA_WIDTH = CHANNEL_DATA_WIDTH * NUM_OF_CHANNELS;
   localparam NUM_OF_SAMPLES = NUM_OF_CHANNELS * SAMPLES_PER_CHANNEL;
+  localparam LOG2_NUM_OF_SAMPLES = $clog2(NUM_OF_SAMPLES);
 
   /*
    * Reset and control signals for the state machine. Data and control have
@@ -189,6 +192,11 @@ module pack_shell #(
       wire [SAMPLE_ADDRESS_WIDTH-1:0] prefix_count_s[0:NUM_OF_SAMPLES];
 
       /*
+       * Used for the vectorized approach when PARALLEL_OR_SERIAL_N == 1
+       */
+      wire [SAMPLE_ADDRESS_WIDTH-1:0] prefix_count_tmp[0:LOG2_NUM_OF_SAMPLES+1][0:NUM_OF_SAMPLES-1];
+
+      /*
        * Samples are interleaved, so the sample mask is just the channel mask
        * concatenated with itself SAMPLES_PER_CHANNEL times.
        */
@@ -200,13 +208,50 @@ module pack_shell #(
        */
       assign ce_ctrl = startup_ctrl | ce;
 
+      if (PARALLEL_OR_SERIAL_N == 1) begin
+        /*
+        * Calculate the prefix sum using a vectorized approach.
+        * This way we should have at most log2(NUM_OF_SAMPLES)
+        * adders in series for the rightmost element and even less
+        * for the elements before it since we just propagate it to
+        * the last row from where it was calculated.
+        */
+
+        /* Copy the samples_enable to the first row to make addressing it easier */
+        genvar j;
+        for (j = 0; j < NUM_OF_SAMPLES; j = j + 1) begin: samples_enable_copy
+          assign prefix_count_tmp[0][j] = ~samples_enable[j];
+        end
+
+        /*
+        * E.g: for samples_enable = '1 1 1 1 1 1 1 1':
+        * prefix_count_tmp[0] = '1 1 1 1 1 1 1 1' (copy of samples_enable)
+        * prefix_count_tmp[1] = '1 2 2 2 2 2 2 2'
+        * prefix_count_tmp[2] = '1 2 3 4 4 4 4 4'
+        * prefix_count_tmp[3] = '1 2 3 4 5 6 7 8'
+        */
+        genvar k;
+        for (j = 1; j < LOG2_NUM_OF_SAMPLES + 1; j = j + 1) begin: prefix_count_tmp_lines
+          for (k = 0; k < NUM_OF_SAMPLES; k = k + 1) begin: prefix_count_tmp_cols
+            if (k < 2 ** (j-1)) begin
+              assign prefix_count_tmp[j][k] = prefix_count_tmp[j-1][k];
+            end else begin
+              assign prefix_count_tmp[j][k] = prefix_count_tmp[j-1][k] + prefix_count_tmp[j-1][k - 2 ** (j-1)];
+            end
+          end
+        end
+      end
+
       /* First channel has no other channels before it */
       assign prefix_count_s[0] = 'h0;
 
       genvar i;
       for (i = 0; i < NUM_OF_SAMPLES; i = i + 1) begin: gen_prefix_count
-        assign prefix_count_s[i+1] = prefix_count_s[i] + (samples_enable[i] ? 1'b0 : 1'b1);
-
+        if (PARALLEL_OR_SERIAL_N == 1) begin
+          assign prefix_count_s[i+1] = prefix_count_tmp[LOG2_NUM_OF_SAMPLES][i];
+        end else begin
+          assign prefix_count_s[i+1] = prefix_count_s[i] + (samples_enable[i] ? 1'b0 : 1'b1);
+        end
         if (i < 2 || NUM_OF_CHANNELS <= 2) begin
           /* This will only be one bit, no need to register it */
           always @(prefix_count_s[i]) begin
@@ -250,7 +295,6 @@ module pack_shell #(
          * asserted for one clock cycle at a time.
          */
         reg rotate_msb = 1'b0;
-
 
         /*
          * Extended version of the normal control and data signals that can
@@ -348,8 +392,7 @@ module pack_shell #(
           .prefix_count (ext_prefix_count),
 
           .data_in (ext_data_in),
-          .data_out (ext_data_out)
-        );
+          .data_out (ext_data_out));
 
         /*
          * In order to go from this stage that has 2 * NUM_OF_SAMPLES inputs
@@ -365,9 +408,8 @@ module pack_shell #(
           .WORDS_PER_GROUP (2),
           .WORD_WIDTH (2 * SAMPLE_DATA_WIDTH)
         ) i_ext_shuffle (
-           .data_in (ext_data_out),
-           .data_out (ext_data_shuffled)
-        );
+          .data_in (ext_data_out),
+          .data_out (ext_data_shuffled));
 
         assign ext_data_in = {data_d1,{2*CHANNEL_DATA_WIDTH{1'b0}},in_data};
         assign data[0] = ext_data_shuffled[0+:TOTAL_DATA_WIDTH];
@@ -427,8 +469,7 @@ module pack_shell #(
             .prefix_count (prefix_count),
 
             .data_in (data[i]),
-            .data_out (data[i+1])
-          );
+            .data_out (data[i+1]));
         end else begin
           assign data[i+1] = data[i];
         end

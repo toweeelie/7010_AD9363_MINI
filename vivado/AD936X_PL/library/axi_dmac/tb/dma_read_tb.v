@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2018 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2018-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -36,7 +36,7 @@
 `timescale 1ns/100ps
 
 module dma_read_tb;
-  parameter VCD_FILE = {`__FILE__,"cd"};
+  parameter VCD_FILE = {"dma_read_tb.vcd"};
   parameter WIDTH_DEST = 32;
   parameter WIDTH_SRC = 32;
   parameter REQ_LEN_INC = 4;
@@ -91,8 +91,7 @@ module dma_read_tb;
     .rvalid(rvalid),
     .rdata(rdata),
     .rresp(rresp),
-    .rlast(rlast)
-  );
+    .rlast(rlast));
 
   wire fifo_rd_en = 1'b1;
   wire fifo_rd_valid;
@@ -151,8 +150,7 @@ module dma_read_tb;
     .fifo_rd_en(fifo_rd_en),
     .fifo_rd_valid(fifo_rd_valid),
     .fifo_rd_underflow(fifo_rd_underflow),
-    .fifo_rd_dout(fifo_rd_dout)
-  );
+    .fifo_rd_dout(fifo_rd_dout));
 
   always @(posedge clk) begin: dout
     integer i;

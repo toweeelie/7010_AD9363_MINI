@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2024 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -39,8 +39,8 @@ module dest_axi_stream #(
 
   parameter ID_WIDTH = 3,
   parameter S_AXIS_DATA_WIDTH = 64,
-  parameter BEATS_PER_BURST_WIDTH = 4)(
-
+  parameter BEATS_PER_BURST_WIDTH = 4
+) (
   input s_axis_aclk,
   input s_axis_aresetn,
 
@@ -56,6 +56,7 @@ module dest_axi_stream #(
   input m_axis_ready,
   output m_axis_valid,
   output [S_AXIS_DATA_WIDTH-1:0] m_axis_data,
+  output reg [0:0] m_axis_user = 1'b1,
   output m_axis_last,
 
   output fifo_ready,
@@ -65,7 +66,10 @@ module dest_axi_stream #(
 
   input req_valid,
   output req_ready,
+  input req_sync_transfer_start,
+  input req_sync,
   input req_xlast,
+  input req_islast,
 
   output response_valid,
   input response_ready,
@@ -75,82 +79,103 @@ module dest_axi_stream #(
 
 `include "inc_id.vh"
 
-reg data_enabled = 1'b0;
-reg req_xlast_d = 1'b0;
-reg active = 1'b0;
+  reg [ID_WIDTH-1:0] id = 'h0;
 
-reg [ID_WIDTH-1:0] id = 'h0;
+  reg data_enabled = 1'b0;
+  reg req_xlast_d = 1'b0;
+  reg req_islast_d = 1'b0;
+  reg active = 1'b0;
+  reg needs_sync = 1'b0;
 
-/* Last beat of the burst */
-wire fifo_last_beat;
-/* Last beat of the segment */
-wire fifo_eot_beat;
+  wire has_sync;
+  // Last beat of the burst
+  wire fifo_last_beat;
+  // Last beat of the segment
+  wire fifo_eot_beat;
 
-/* fifo_last == 1'b1 implies fifo_valid == 1'b1 */
-assign fifo_last_beat = fifo_ready & fifo_last;
-assign fifo_eot_beat = fifo_last_beat & data_eot;
+  assign has_sync = ~needs_sync | req_sync;
 
-assign req_ready = fifo_eot_beat | ~active;
-assign data_id = id;
-assign xfer_req = active;
+  // fifo_last == 1'b1 implies fifo_valid == 1'b1
+  assign fifo_last_beat = fifo_ready & fifo_last;
+  assign fifo_eot_beat = fifo_last_beat & data_eot;
 
-assign m_axis_valid = fifo_valid & active;
-assign fifo_ready = m_axis_ready & active;
-assign m_axis_last = req_xlast_d & fifo_last & data_eot;
-assign m_axis_data = fifo_data;
+  assign req_ready = fifo_eot_beat | ~active;
+  assign data_id = id;
+  assign xfer_req = active;
 
-always @(posedge s_axis_aclk) begin
-  if (s_axis_aresetn == 1'b0) begin
-    data_enabled <= 1'b0;
-  end else if (enable == 1'b1) begin
-    data_enabled <= 1'b1;
-  end else if (m_axis_valid == 1'b0 || m_axis_ready == 1'b1) begin
-    data_enabled <= 1'b0;
+  assign m_axis_valid = fifo_valid & active & has_sync;
+  assign fifo_ready = m_axis_ready & active & has_sync;
+  assign m_axis_last = req_xlast_d & fifo_last & data_eot;
+  assign m_axis_data = fifo_data;
+
+  always @(posedge s_axis_aclk) begin
+    if (req_ready == 1'b1) begin
+      needs_sync <= req_sync_transfer_start;
+    end else if (fifo_ready == 1'b1) begin
+      needs_sync <= 1'b0;
+    end
   end
-end
 
-always @(posedge s_axis_aclk) begin
-  if (req_ready == 1'b1) begin
-    req_xlast_d <= req_xlast;
+  always @(posedge s_axis_aclk) begin
+    if (s_axis_aresetn == 1'b0) begin
+      data_enabled <= 1'b0;
+    end else if (enable == 1'b1) begin
+      data_enabled <= 1'b1;
+    end else if (m_axis_valid == 1'b0 || m_axis_ready == 1'b1) begin
+      data_enabled <= 1'b0;
+    end
   end
-end
 
-always @(posedge s_axis_aclk) begin
-  if (s_axis_aresetn == 1'b0) begin
-    active <= 1'b0;
-  end else if (req_valid == 1'b1) begin
-    active <= 1'b1;
-  end else if (fifo_eot_beat == 1'b1) begin
-    active <= 1'b0;
+  always @(posedge s_axis_aclk) begin
+    if (req_ready == 1'b1) begin
+      req_xlast_d <= req_xlast;
+      req_islast_d <= req_islast;
+    end
   end
-end
 
-always @(posedge s_axis_aclk) begin
-  if (s_axis_aresetn == 1'b0) begin
-    id <= 'h00;
-  end else if (fifo_last_beat == 1'b1) begin
-    id <= inc_id(id);
+  always @(posedge s_axis_aclk) begin
+    if (s_axis_aresetn == 1'b0) begin
+      active <= 1'b0;
+    end else if (req_valid == 1'b1) begin
+      active <= 1'b1;
+    end else if (fifo_eot_beat == 1'b1) begin
+      active <= 1'b0;
+    end
   end
-end
 
-response_generator # (
-  .ID_WIDTH(ID_WIDTH)
-) i_response_generator (
-  .clk(s_axis_aclk),
-  .resetn(s_axis_aresetn),
+  always @(posedge s_axis_aclk) begin
+    if (s_axis_aresetn == 1'b0) begin
+      id <= 'h00;
+    end else if (fifo_last_beat == 1'b1) begin
+      id <= inc_id(id);
+    end
+  end
 
-  .enable(data_enabled),
-  .enabled(enabled),
+  always @(posedge s_axis_aclk) begin
+    if (s_axis_aresetn == 1'b0) begin
+      m_axis_user <= 1'b1;
+    end else if (m_axis_valid && m_axis_ready) begin
+      m_axis_user <= m_axis_last & req_islast_d;
+    end
+  end
 
-  .request_id(id),
-  .response_id(response_id),
+  response_generator #(
+    .ID_WIDTH(ID_WIDTH)
+  ) i_response_generator (
+    .clk(s_axis_aclk),
+    .resetn(s_axis_aresetn),
 
-  .eot(response_eot),
+    .enable(data_enabled),
+    .enabled(enabled),
 
-  .resp_valid(response_valid),
-  .resp_ready(response_ready),
-  .resp_eot(response_resp_eot),
-  .resp_resp(response_resp)
-);
+    .request_id(id),
+    .response_id(response_id),
+
+    .eot(response_eot),
+
+    .resp_valid(response_valid),
+    .resp_ready(response_ready),
+    .resp_eot(response_resp_eot),
+    .resp_resp(response_resp));
 
 endmodule

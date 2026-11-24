@@ -1,37 +1,7 @@
-## ***************************************************************************
-## ***************************************************************************
-## Copyright 2014 - 2018 (c) Analog Devices, Inc. All rights reserved.
-##
-## In this HDL repository, there are many different and unique modules, consisting
-## of various HDL (Verilog or VHDL) components. The individual modules are
-## developed independently, and may be accompanied by separate and unique license
-## terms.
-##
-## The user should read each of these license terms, and understand the
-## freedoms and responsibilities that he or she has by using this source/core.
-##
-## This core is distributed in the hope that it will be useful, but WITHOUT ANY
-## WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-## A PARTICULAR PURPOSE.
-##
-## Redistribution and use of source or resulting binaries, with or without modification
-## of this file, are permitted under one of the following two license terms:
-##
-##   1. The GNU General Public License version 2 as published by the
-##      Free Software Foundation, which can be found in the top level directory
-##      of this repository (LICENSE_GPL2), and also online at:
-##      <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
-##
-## OR
-##
-##   2. An ADI specific BSD license, which can be found in the top level directory
-##      of this repository (LICENSE_ADIBSD), and also on-line at:
-##      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
-##      This will allow to generate bit files and not release the source code,
-##      as long as it attaches to an ADI device.
-##
-## ***************************************************************************
-## ***************************************************************************
+###############################################################################
+## Copyright (C) 2019-2024 Analog Devices, Inc. All rights reserved.
+### SPDX short identifier: ADIBSD
+###############################################################################
 
 # adi_intel_device_info_enc.tcl
 
@@ -71,7 +41,8 @@ set fpga_technology_list { \
         { "Cyclone V"  101 } \
         { "Cyclone 10" 102 } \
         { "Arria 10"   103 } \
-        { "Stratix 10" 104 }}
+        { "Stratix 10" 104 } \
+        { "Agilex 7"   105 }}
 
 set fpga_family_list { \
         { Unknown   0 } \
@@ -79,7 +50,9 @@ set fpga_family_list { \
         { GX        2 } \
         { GT        3 } \
         { GZ        4 } \
-        { "SE Base" 5 }}
+        { "SE Base" 5 } \
+        { "I-Series with HPS only" 6 } \
+        { TX        6 }}
 
        #technology 5 generation
        # family Arria SX
@@ -162,8 +135,13 @@ proc get_part_param {} {
     }
 
     # user and system values (sys_val)
-    regsub {V} $fpga_voltage "" fpga_voltage
-    set fpga_voltage [expr int([expr $fpga_voltage * 1000])] ;# // V to mV conversion(integer val)
+    if { $fpga_technology == "{{Agilex 7}}" } {
+      # TODO : Transform VID2 to some voltage
+      set fpga_voltage "0"
+    } else {
+      regsub {V} $fpga_voltage "" fpga_voltage
+      set fpga_voltage [expr int([expr $fpga_voltage * 1000])] ;# // V to mV conversion(integer val)
+    }
 
 }
 

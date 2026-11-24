@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2023 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -37,8 +37,8 @@
 
 module response_handler #(
 
-  parameter ID_WIDTH = 3)(
-
+  parameter ID_WIDTH = 3
+) (
   input clk,
   input resetn,
 
@@ -60,34 +60,34 @@ module response_handler #(
   output [1:0] resp_resp
 );
 
-`include "resp.vh"
-`include "inc_id.vh"
+  `include "resp.vh"
+  `include "inc_id.vh"
 
-assign resp_resp = bresp;
-assign resp_eot = eot;
+  assign resp_resp = bresp;
+  assign resp_eot = eot;
 
-wire active = id != request_id;
+  wire active = id != request_id;
 
-assign bready = active && resp_ready;
-assign resp_valid = active && bvalid;
+  assign bready = active && resp_ready;
+  assign resp_valid = active && bvalid;
 
-// We have to wait for all responses before we can disable the response handler
-always @(posedge clk) begin
-  if (resetn == 1'b0) begin
-    enabled <= 1'b0;
-  end else if (enable == 1'b1) begin
-      enabled <= 1'b1;
-  end else if (request_id == id) begin
+  // We have to wait for all responses before we can disable the response handler
+  always @(posedge clk) begin
+    if (resetn == 1'b0) begin
       enabled <= 1'b0;
+    end else if (enable == 1'b1) begin
+        enabled <= 1'b1;
+    end else if (request_id == id) begin
+        enabled <= 1'b0;
+    end
   end
-end
 
-always @(posedge clk) begin
-  if (resetn == 1'b0) begin
-    id <= 'h0;
-  end else if (bready == 1'b1 && bvalid == 1'b1) begin
-    id <= inc_id(id);
+  always @(posedge clk) begin
+    if (resetn == 1'b0) begin
+      id <= 'h0;
+    end else if (bready == 1'b1 && bvalid == 1'b1) begin
+      id <= inc_id(id);
+    end
   end
-end
 
 endmodule

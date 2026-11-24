@@ -1,6 +1,6 @@
 // ***************************************************************************
 // ***************************************************************************
-// Copyright 2014 - 2017 (c) Analog Devices, Inc. All rights reserved.
+// Copyright (C) 2014-2024 Analog Devices, Inc. All rights reserved.
 //
 // In this HDL repository, there are many different and unique modules, consisting
 // of various HDL (Verilog or VHDL) components. The individual modules are
@@ -26,7 +26,7 @@
 //
 //   2. An ADI specific BSD license, which can be found in the top level directory
 //      of this repository (LICENSE_ADIBSD), and also on-line at:
-//      https://github.com/analogdevicesinc/hdl/blob/master/LICENSE_ADIBSD
+//      https://github.com/analogdevicesinc/hdl/blob/main/LICENSE_ADIBSD
 //      This will allow to generate bit files and not release the source code,
 //      as long as it attaches to an ADI device.
 //
@@ -39,8 +39,8 @@ module dest_fifo_inf #(
 
   parameter ID_WIDTH = 3,
   parameter DATA_WIDTH = 64,
-  parameter BEATS_PER_BURST_WIDTH = 4)(
-
+  parameter BEATS_PER_BURST_WIDTH = 4
+) (
   input clk,
   input resetn,
 
@@ -49,6 +49,8 @@ module dest_fifo_inf #(
 
   input req_valid,
   output req_ready,
+  input req_sync_transfer_start,
+  input req_sync,
 
   output [ID_WIDTH-1:0] response_id,
   output reg [ID_WIDTH-1:0] data_id = 'h0,
@@ -75,70 +77,83 @@ module dest_fifo_inf #(
 
 `include "inc_id.vh"
 
-reg active = 1'b0;
+  reg active = 1'b0;
+  reg needs_sync = 1'b0;
 
-/* Last beat of the burst */
-wire fifo_last_beat;
-/* Last beat of the segment */
-wire fifo_eot_beat;
+  wire has_sync;
+  wire fifo_sync_valid;
+  // Last beat of the burst
+  wire fifo_last_beat;
+  // Last beat of the segment
+  wire fifo_eot_beat;
 
-assign enabled = enable;
-assign fifo_ready = en & (fifo_valid | ~enable);
+  assign has_sync = ~needs_sync | req_sync;
 
-/* fifo_last == 1'b1 implies fifo_valid == 1'b1 */
-assign fifo_last_beat = fifo_ready & fifo_last;
-assign fifo_eot_beat = fifo_last_beat & data_eot;
+  assign enabled = enable;
+  assign fifo_sync_valid = fifo_valid & has_sync;
+  assign fifo_ready = en & (fifo_sync_valid | ~enable);
 
-assign req_ready = fifo_eot_beat | ~active;
-assign xfer_req = active;
+  // fifo_last == 1'b1 implies fifo_valid == 1'b1
+  assign fifo_last_beat = fifo_ready & fifo_last;
+  assign fifo_eot_beat = fifo_last_beat & data_eot;
 
-always @(posedge clk) begin
-  if (en) begin
-    dout <= fifo_valid ? fifo_data : {DATA_WIDTH{1'b0}};
-    valid <= fifo_valid & enable;
-    underflow <= ~(fifo_valid & enable);
-  end else begin
-    valid <= 1'b0;
-    underflow <= 1'b0;
+  assign req_ready = fifo_eot_beat | ~active;
+  assign xfer_req = active;
+
+  always @(posedge clk) begin
+    if (req_ready == 1'b1) begin
+      needs_sync <= req_sync_transfer_start;
+    end else if (fifo_ready == 1'b1) begin
+      needs_sync <= 1'b0;
+    end
   end
-end
 
-always @(posedge clk) begin
-  if (resetn == 1'b0) begin
-    data_id <= 'h00;
-  end else if (fifo_last_beat == 1'b1) begin
-    data_id <= inc_id(data_id);
+  always @(posedge clk) begin
+    if (en) begin
+      dout <= fifo_sync_valid ? fifo_data : {DATA_WIDTH{1'b0}};
+      valid <= fifo_sync_valid & enable;
+      underflow <= ~(fifo_sync_valid & enable);
+    end else begin
+      valid <= 1'b0;
+      underflow <= 1'b0;
+    end
   end
-end
 
-always @(posedge clk) begin
-  if (resetn == 1'b0) begin
-    active <= 1'b0;
-  end else if (req_valid == 1'b1) begin
-    active <= 1'b1;
-  end else if (fifo_eot_beat == 1'b1) begin
-    active <= 1'b0;
+  always @(posedge clk) begin
+    if (resetn == 1'b0) begin
+      data_id <= 'h00;
+    end else if (fifo_last_beat == 1'b1) begin
+      data_id <= inc_id(data_id);
+    end
   end
-end
 
-response_generator # (
-  .ID_WIDTH(ID_WIDTH)
-) i_response_generator (
-  .clk(clk),
-  .resetn(resetn),
+  always @(posedge clk) begin
+    if (resetn == 1'b0) begin
+      active <= 1'b0;
+    end else if (req_valid == 1'b1) begin
+      active <= 1'b1;
+    end else if (fifo_eot_beat == 1'b1) begin
+      active <= 1'b0;
+    end
+  end
 
-  .enable(enable),
-  .enabled(),
+  response_generator #(
+    .ID_WIDTH(ID_WIDTH)
+  ) i_response_generator (
+    .clk(clk),
+    .resetn(resetn),
 
-  .request_id(data_id),
-  .response_id(response_id),
+    .enable(enable),
+    .enabled(),
 
-  .eot(response_eot),
+    .request_id(data_id),
+    .response_id(response_id),
 
-  .resp_valid(response_valid),
-  .resp_ready(response_ready),
-  .resp_eot(response_resp_eot),
-  .resp_resp(response_resp)
-);
+    .eot(response_eot),
+
+    .resp_valid(response_valid),
+    .resp_ready(response_ready),
+    .resp_eot(response_resp_eot),
+    .resp_resp(response_resp));
 
 endmodule
