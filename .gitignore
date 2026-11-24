@@ -13,3 +13,4 @@ _ide/
 Debug/
 Release/
 .DS_Store
+wsp/
