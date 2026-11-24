@@ -43,6 +43,9 @@
 
 #include <stdlib.h>
 #include <xparameters.h>
+#ifndef XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ
+#define XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ XPAR_CPU_CORE_CLOCK_FREQ_HZ
+#endif
 #include "no_os_timer.h"
 #include "timer_extra.h"
 #include "no_os_error.h"

@@ -56,7 +56,7 @@
 #include "spi_extra.h"
 
 #if defined(PLATFORM_ZYNQ)
-#define SPI_CLK_FREQ_HZ(dev)	(XPAR_PS7_SPI_ ## dev ## _SPI_CLK_FREQ_HZ)
+#define SPI_CLK_FREQ_HZ(dev)	(XPAR_SPI ## dev ## _SPI_CLK_FREQ_HZ)
 #define SPI_NUM_INSTANCES	XPAR_XSPIPS_NUM_INSTANCES
 #elif defined(PLATFORM_ZYNQMP)
 #define SPI_CLK_FREQ_HZ(dev)	(XPAR_PSU_SPI_ ## dev ## _SPI_CLK_FREQ_HZ)

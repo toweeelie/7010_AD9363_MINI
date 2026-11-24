@@ -130,8 +130,10 @@
 #define GPIO_RESET_PIN				46
 #ifdef XPAR_AXI_SPI_0_DEVICE_ID
 #define SPI_DEVICE_ID				XPAR_AXI_SPI_0_DEVICE_ID
-#else
+#elif defined(XPAR_SPI_0_DEVICE_ID)
 #define SPI_DEVICE_ID				XPAR_SPI_0_DEVICE_ID
+#else
+#define SPI_DEVICE_ID				XPAR_SPI0_BASEADDR
 #endif
 #endif
 
